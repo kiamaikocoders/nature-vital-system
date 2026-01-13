@@ -10,9 +10,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Activity,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -26,6 +29,7 @@ const navItems = [
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { signOut, profile } = useAuth();
 
   return (
     <aside
@@ -85,6 +89,21 @@ export function AppSidebar() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Logout Button */}
+      <div className="p-3 border-t border-border">
+        <Button
+          variant="ghost"
+          onClick={() => signOut()}
+          className={cn(
+            "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10",
+            collapsed && "justify-center px-0"
+          )}
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {!collapsed && <span className="ml-3 font-medium text-sm">Log out</span>}
+        </Button>
       </div>
 
       {/* Collapse Toggle */}
