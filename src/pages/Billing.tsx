@@ -1,21 +1,83 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Plus, Receipt, DollarSign, CreditCard, Clock } from "lucide-react";
-
-const invoices = [
-  { id: "INV001", patient: "John Mwangi", date: "2024-01-10", items: "Consultation + VitalCal", amount: 5500, status: "Paid", branch: "Machakos" },
-  { id: "INV002", patient: "Mary Wanjiku", date: "2024-01-09", items: "Consultation", amount: 2000, status: "Paid", branch: "Mlolongo" },
-  { id: "INV003", patient: "Peter Ochieng", date: "2024-01-08", items: "Consultation + Super Detox + NeuroVital", amount: 8000, status: "Pending", branch: "Matuu" },
-  { id: "INV004", patient: "Grace Akinyi", date: "2024-01-07", items: "Consultation + PureFlow", amount: 4500, status: "Paid", branch: "Tala Town" },
-  { id: "INV005", patient: "David Kiprop", date: "2024-01-05", items: "Follow-up + ImmunoBoost", amount: 2500, status: "Overdue", branch: "Machakos" },
-];
+import { CreateInvoiceDialog } from "@/components/billing/CreateInvoiceDialog";
+import { ViewInvoiceDialog } from "@/components/billing/ViewInvoiceDialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 export default function Billing() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<{
+    id: string;
+    patient: string;
+    date: string;
+    items: string;
+    amount: number;
+    status: string;
+    branch: string;
+  } | null>(null);
+
+  const { data: invoicesData = [], refetch } = useQuery({
+    queryKey: ["invoices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("invoices")
+        .select(`
+          *,
+          patients(first_name, last_name),
+          branches(name)
+        `)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const invoices = invoicesData.map(inv => {
+    const items = Array.isArray(inv.items) 
+      ? (inv.items as { name: string }[]).map(i => i.name).join(", ")
+      : "Items";
+    
+    return {
+      id: inv.invoice_number || inv.id.slice(0, 8),
+      realId: inv.id,
+      patient: inv.patients ? `${inv.patients.first_name} ${inv.patients.last_name}` : "Walk-in",
+      date: inv.created_at ? format(new Date(inv.created_at), "yyyy-MM-dd") : "",
+      items,
+      amount: Number(inv.total) || 0,
+      status: inv.status === "paid" ? "Paid" : inv.status === "pending" ? "Pending" : "Overdue",
+      branch: inv.branches?.name || "Unknown",
+    };
+  });
+
+  const filteredInvoices = invoices.filter(inv =>
+    inv.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    inv.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const totalRevenue = invoices.filter(i => i.status === "Paid").reduce((sum, i) => sum + i.amount, 0);
   const pendingAmount = invoices.filter(i => i.status !== "Paid").reduce((sum, i) => sum + i.amount, 0);
+
+  const openViewDialog = (inv: typeof invoices[0]) => {
+    setSelectedInvoice({
+      id: inv.realId,
+      patient: inv.patient,
+      date: inv.date,
+      items: inv.items,
+      amount: inv.amount,
+      status: inv.status,
+      branch: inv.branch,
+    });
+    setViewDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -24,7 +86,7 @@ export default function Billing() {
           <h1 className="text-2xl font-bold text-foreground">Billing & Revenue</h1>
           <p className="text-muted-foreground">Invoice management and payment tracking</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4" />
           Create Invoice
         </Button>
@@ -92,7 +154,12 @@ export default function Billing() {
             <CardTitle className="text-lg font-semibold">Recent Invoices</CardTitle>
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search invoices..." className="pl-10" />
+              <Input 
+                placeholder="Search invoices..." 
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
         </CardHeader>
@@ -111,32 +178,56 @@ export default function Billing() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-mono text-sm">{invoice.id}</TableCell>
-                  <TableCell className="font-medium">{invoice.patient}</TableCell>
-                  <TableCell className="text-muted-foreground">{invoice.date}</TableCell>
-                  <TableCell className="text-sm max-w-[200px] truncate">{invoice.items}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{invoice.branch}</Badge>
-                  </TableCell>
-                  <TableCell className="font-semibold">{invoice.amount.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={invoice.status === "Paid" ? "default" : invoice.status === "Pending" ? "secondary" : "destructive"}
-                    >
-                      {invoice.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm">View</Button>
+              {filteredInvoices.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    {searchQuery ? "No invoices found" : "No invoices yet. Create your first invoice!"}
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredInvoices.map((invoice) => (
+                  <TableRow key={invoice.realId}>
+                    <TableCell className="font-mono text-sm">{invoice.id}</TableCell>
+                    <TableCell className="font-medium">{invoice.patient}</TableCell>
+                    <TableCell className="text-muted-foreground">{invoice.date}</TableCell>
+                    <TableCell className="text-sm max-w-[200px] truncate">{invoice.items}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{invoice.branch}</Badge>
+                    </TableCell>
+                    <TableCell className="font-semibold">{invoice.amount.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={invoice.status === "Paid" ? "default" : invoice.status === "Pending" ? "secondary" : "destructive"}
+                      >
+                        {invoice.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => openViewDialog(invoice)}>
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
+      <CreateInvoiceDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onInvoiceCreated={refetch}
+      />
+
+      <ViewInvoiceDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        invoice={selectedInvoice}
+        onStatusChange={refetch}
+      />
     </div>
   );
 }
