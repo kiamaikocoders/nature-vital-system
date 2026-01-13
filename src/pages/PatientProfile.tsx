@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { ClinicalAssistant } from "@/components/ai/ClinicalAssistant";
+import { NewVisitForm } from "@/components/patients/NewVisitForm";
 import { 
   ArrowLeft, User, Phone, Mail, MapPin, Heart, 
   AlertTriangle, Calendar, Activity, Pill, FileText,
-  Clock, Stethoscope
+  Clock, Stethoscope, Plus
 } from "lucide-react";
 
 interface Patient {
@@ -29,6 +30,7 @@ interface Patient {
   allergies: string[] | null;
   medical_history: any;
   diet_tracker: any;
+  branch_id: string;
   created_at: string;
 }
 
@@ -50,27 +52,28 @@ export default function PatientProfile() {
   const [patient, setPatient] = useState<Patient | null>(null);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showNewVisit, setShowNewVisit] = useState(false);
+
+  const fetchPatientData = useCallback(async () => {
+    if (!id) return;
+    
+    const [patientResult, visitsResult] = await Promise.all([
+      supabase.from("patients").select("*").eq("id", id).maybeSingle(),
+      supabase.from("patient_visits").select("*").eq("patient_id", id).order("visit_date", { ascending: false })
+    ]);
+
+    if (patientResult.data) {
+      setPatient(patientResult.data as Patient);
+    }
+    if (visitsResult.data) {
+      setVisits(visitsResult.data as Visit[]);
+    }
+    setIsLoading(false);
+  }, [id]);
 
   useEffect(() => {
-    const fetchPatient = async () => {
-      if (!id) return;
-      
-      const [patientResult, visitsResult] = await Promise.all([
-        supabase.from("patients").select("*").eq("id", id).maybeSingle(),
-        supabase.from("patient_visits").select("*").eq("patient_id", id).order("visit_date", { ascending: false })
-      ]);
-
-      if (patientResult.data) {
-        setPatient(patientResult.data as Patient);
-      }
-      if (visitsResult.data) {
-        setVisits(visitsResult.data as Visit[]);
-      }
-      setIsLoading(false);
-    };
-
-    fetchPatient();
-  }, [id]);
+    fetchPatientData();
+  }, [fetchPatientData]);
 
   if (isLoading) {
     return (
@@ -108,6 +111,20 @@ export default function PatientProfile() {
 
   return (
     <div className="space-y-6">
+      {/* New Visit Modal */}
+      {showNewVisit && (
+        <NewVisitForm
+          patientId={patient.id}
+          patientName={`${patient.first_name} ${patient.last_name}`}
+          branchId={patient.branch_id}
+          onClose={() => setShowNewVisit(false)}
+          onSuccess={() => {
+            setShowNewVisit(false);
+            fetchPatientData();
+          }}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => navigate("/patients")}>
@@ -119,11 +136,15 @@ export default function PatientProfile() {
               {patient.first_name} {patient.last_name}
             </h1>
             <Badge variant="outline" className="font-mono">{patient.patient_code}</Badge>
+            <Badge variant="secondary">{visits.length} visits</Badge>
           </div>
           <p className="text-muted-foreground">Patient Profile</p>
         </div>
         <Button variant="outline">Edit Profile</Button>
-        <Button>Book Appointment</Button>
+        <Button onClick={() => setShowNewVisit(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          New Visit
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -249,7 +270,7 @@ export default function PatientProfile() {
         <div className="lg:col-span-2 space-y-6">
           <Tabs defaultValue="timeline" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="timeline">Visit Timeline</TabsTrigger>
+              <TabsTrigger value="timeline">Visit Timeline ({visits.length})</TabsTrigger>
               <TabsTrigger value="assistant">AI Assistant</TabsTrigger>
               <TabsTrigger value="history">Medical History</TabsTrigger>
             </TabsList>
@@ -257,16 +278,30 @@ export default function PatientProfile() {
             <TabsContent value="timeline" className="mt-4">
               <Card className="border-border bg-card">
                 <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    Visit History
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      Visit History
+                    </CardTitle>
+                    <Button size="sm" onClick={() => setShowNewVisit(true)} className="gap-1">
+                      <Plus className="h-4 w-4" />
+                      Add Visit
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   {visits.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
                       <p>No visits recorded yet</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-4"
+                        onClick={() => setShowNewVisit(true)}
+                      >
+                        Record First Visit
+                      </Button>
                     </div>
                   ) : (
                     <div className="relative">
@@ -288,16 +323,16 @@ export default function PatientProfile() {
                                       })}
                                     </p>
                                     {visit.chief_complaint && (
-                                      <p className="text-sm text-muted-foreground">
-                                        Chief Complaint: {visit.chief_complaint}
+                                      <p className="text-sm text-muted-foreground mt-1">
+                                        <span className="font-medium">Chief Complaint:</span> {visit.chief_complaint}
                                       </p>
                                     )}
                                   </div>
-                                  <Button variant="ghost" size="sm">View</Button>
+                                  <Badge variant="outline">Visit #{visits.length - idx}</Badge>
                                 </div>
                                 
                                 {visit.vitals && (
-                                  <div className="grid grid-cols-4 gap-2 my-3 p-2 bg-accent/30 rounded-lg text-xs">
+                                  <div className="grid grid-cols-3 md:grid-cols-6 gap-2 my-3 p-3 bg-accent/30 rounded-lg text-xs">
                                     <div>
                                       <p className="text-muted-foreground">BP</p>
                                       <p className="font-medium">{visit.vitals.bp || "—"}</p>
@@ -314,12 +349,20 @@ export default function PatientProfile() {
                                       <p className="text-muted-foreground">Weight</p>
                                       <p className="font-medium">{visit.vitals.weight || "—"}</p>
                                     </div>
+                                    <div>
+                                      <p className="text-muted-foreground">Height</p>
+                                      <p className="font-medium">{visit.vitals.height || "—"}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-muted-foreground">O₂ Sat</p>
+                                      <p className="font-medium">{visit.vitals.oxygen_sat || "—"}</p>
+                                    </div>
                                   </div>
                                 )}
 
                                 {visit.diagnosis && (
-                                  <div className="flex items-start gap-2 text-sm">
-                                    <Stethoscope className="h-4 w-4 text-primary mt-0.5" />
+                                  <div className="flex items-start gap-2 text-sm mb-2">
+                                    <Stethoscope className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                                     <div>
                                       <p className="font-medium">Diagnosis</p>
                                       <p className="text-muted-foreground">{visit.diagnosis}</p>
@@ -327,17 +370,34 @@ export default function PatientProfile() {
                                   </div>
                                 )}
 
-                                {visit.supplements_recommended && Array.isArray(visit.supplements_recommended) && visit.supplements_recommended.length > 0 && (
-                                  <div className="flex items-start gap-2 text-sm mt-2">
-                                    <Pill className="h-4 w-4 text-primary mt-0.5" />
+                                {visit.treatment && (
+                                  <div className="flex items-start gap-2 text-sm mb-2">
+                                    <FileText className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                                     <div>
-                                      <p className="font-medium">Supplements</p>
+                                      <p className="font-medium">Treatment</p>
+                                      <p className="text-muted-foreground">{visit.treatment}</p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {visit.supplements_recommended && Array.isArray(visit.supplements_recommended) && visit.supplements_recommended.length > 0 && (
+                                  <div className="flex items-start gap-2 text-sm">
+                                    <Pill className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                                    <div>
+                                      <p className="font-medium">Supplements Recommended</p>
                                       <div className="flex flex-wrap gap-1 mt-1">
                                         {visit.supplements_recommended.map((sup: string, i: number) => (
                                           <Badge key={i} variant="secondary" className="text-xs">{sup}</Badge>
                                         ))}
                                       </div>
                                     </div>
+                                  </div>
+                                )}
+
+                                {visit.notes && (
+                                  <div className="mt-3 pt-3 border-t border-border text-sm text-muted-foreground">
+                                    <p className="font-medium text-foreground">Notes:</p>
+                                    <p>{visit.notes}</p>
                                   </div>
                                 )}
                               </CardContent>
