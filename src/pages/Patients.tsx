@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,8 @@ const patients = [
 ];
 
 export default function Patients() {
+  const navigate = useNavigate();
+  
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -21,7 +24,7 @@ export default function Patients() {
           <h1 className="text-2xl font-bold text-foreground">Patient Records</h1>
           <p className="text-muted-foreground">Electronic Health Records (EHR) Management</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => navigate("/patients/new")}>
           <Plus className="h-4 w-4" />
           Register Patient
         </Button>
