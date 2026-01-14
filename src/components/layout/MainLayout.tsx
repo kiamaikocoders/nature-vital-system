@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -29,6 +30,9 @@ const roleLabels: Record<string, string> = {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const { profile, roles, signOut } = useAuth();
+  
+  // Initialize realtime notifications
+  useRealtimeNotifications();
 
   const { data: branch } = useQuery({
     queryKey: ["user-branch", profile?.branch_id],
