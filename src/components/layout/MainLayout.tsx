@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
-import { Bell, Search, User, LogOut, ChevronDown } from "lucide-react";
+import { Search, User, LogOut, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -31,8 +32,14 @@ const roleLabels: Record<string, string> = {
 export function MainLayout({ children }: MainLayoutProps) {
   const { profile, roles, signOut } = useAuth();
   
-  // Initialize realtime notifications
-  useRealtimeNotifications();
+  // Initialize realtime notifications and get notification state
+  const { 
+    notifications, 
+    markAsRead, 
+    markAllAsRead, 
+    clearNotification, 
+    clearAllNotifications 
+  } = useRealtimeNotifications();
 
   const { data: branch } = useQuery({
     queryKey: ["user-branch", profile?.branch_id],
@@ -67,12 +74,13 @@ export function MainLayout({ children }: MainLayoutProps) {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute -top-0.5 -right-0.5 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
-                3
-              </span>
-            </Button>
+            <NotificationCenter
+              notifications={notifications}
+              onMarkAsRead={markAsRead}
+              onMarkAllAsRead={markAllAsRead}
+              onClear={clearNotification}
+              onClearAll={clearAllNotifications}
+            />
             
             <div className="h-8 w-px bg-border" />
             
