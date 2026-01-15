@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import {
   Users,
   Package,
   DollarSign,
+  RotateCcw,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,17 +28,16 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  LineChart,
-  Line,
   PieChart as RechartsPie,
   Pie,
   Cell,
-  ResponsiveContainer,
-  Legend,
   Area,
   AreaChart,
 } from "recharts";
-import { format, subDays, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { format, subDays, eachDayOfInterval, isWithinInterval, parseISO, startOfDay, endOfDay } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/components/reports/DateRangePicker";
+import { ExportButton } from "@/components/reports/ExportButton";
 
 const reportTypes = [
   {
@@ -83,6 +84,12 @@ const COLORS = [
 
 export default function Reports() {
   const { isSuperAdmin, profile } = useAuth();
+  
+  // Date range state - default to last 30 days
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
 
   // Fetch invoices for revenue data
   const { data: invoices = [] } = useQuery({
@@ -146,9 +153,46 @@ export default function Reports() {
     },
   });
 
+  // Filter data based on date range
+  const filteredInvoices = useMemo(() => {
+    if (!dateRange?.from) return invoices;
+    return invoices.filter((inv) => {
+      if (!inv.created_at) return false;
+      const date = parseISO(inv.created_at);
+      return isWithinInterval(date, {
+        start: startOfDay(dateRange.from!),
+        end: endOfDay(dateRange.to || dateRange.from!),
+      });
+    });
+  }, [invoices, dateRange]);
+
+  const filteredPatients = useMemo(() => {
+    if (!dateRange?.from) return patients;
+    return patients.filter((patient) => {
+      if (!patient.created_at) return false;
+      const date = parseISO(patient.created_at);
+      return isWithinInterval(date, {
+        start: startOfDay(dateRange.from!),
+        end: endOfDay(dateRange.to || dateRange.from!),
+      });
+    });
+  }, [patients, dateRange]);
+
+  const filteredAppointments = useMemo(() => {
+    if (!dateRange?.from) return appointments;
+    return appointments.filter((apt) => {
+      if (!apt.appointment_date) return false;
+      const date = parseISO(apt.appointment_date);
+      return isWithinInterval(date, {
+        start: startOfDay(dateRange.from!),
+        end: endOfDay(dateRange.to || dateRange.from!),
+      });
+    });
+  }, [appointments, dateRange]);
+
   // Calculate revenue by branch
   const revenueByBranch = branches.map((branch) => {
-    const branchInvoices = invoices.filter((inv) => inv.branch_id === branch.id);
+    const branchInvoices = filteredInvoices.filter((inv) => inv.branch_id === branch.id);
     const totalRevenue = branchInvoices.reduce(
       (sum, inv) => sum + (inv.status === "paid" ? Number(inv.total) || 0 : 0),
       0
@@ -164,26 +208,31 @@ export default function Reports() {
     };
   });
 
-  // Calculate revenue trend (last 7 days)
-  const last7Days = eachDayOfInterval({
-    start: subDays(new Date(), 6),
-    end: new Date(),
-  });
+  // Calculate revenue trend based on date range
+  const revenueTrend = useMemo(() => {
+    const from = dateRange?.from || subDays(new Date(), 6);
+    const to = dateRange?.to || new Date();
+    const days = eachDayOfInterval({ start: from, end: to });
+    
+    // Limit to max 14 data points for readability
+    const step = Math.max(1, Math.floor(days.length / 14));
+    const sampledDays = days.filter((_, i) => i % step === 0);
 
-  const revenueTrend = last7Days.map((day) => {
-    const dayStr = format(day, "yyyy-MM-dd");
-    const dayInvoices = invoices.filter(
-      (inv) => inv.created_at && inv.created_at.startsWith(dayStr) && inv.status === "paid"
-    );
-    const revenue = dayInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
-    return {
-      date: format(day, "EEE"),
-      revenue,
-    };
-  });
+    return sampledDays.map((day) => {
+      const dayStr = format(day, "yyyy-MM-dd");
+      const dayInvoices = filteredInvoices.filter(
+        (inv) => inv.created_at && inv.created_at.startsWith(dayStr) && inv.status === "paid"
+      );
+      const revenue = dayInvoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
+      return {
+        date: format(day, "MMM d"),
+        revenue,
+      };
+    });
+  }, [filteredInvoices, dateRange]);
 
   // Patient demographics by gender
-  const genderStats = patients.reduce(
+  const genderStats = filteredPatients.reduce(
     (acc, patient) => {
       const gender = patient.gender || "Unknown";
       acc[gender] = (acc[gender] || 0) + 1;
@@ -199,7 +248,7 @@ export default function Reports() {
 
   // Patients by branch
   const patientsByBranch = branches.map((branch) => {
-    const count = patients.filter((p) => p.branch_id === branch.id).length;
+    const count = filteredPatients.filter((p) => p.branch_id === branch.id).length;
     return {
       name: branch.name,
       patients: count,
@@ -207,7 +256,7 @@ export default function Reports() {
   });
 
   // Appointment status breakdown
-  const appointmentStats = appointments.reduce(
+  const appointmentStats = filteredAppointments.reduce(
     (acc, apt) => {
       const status = apt.status || "pending";
       acc[status] = (acc[status] || 0) + 1;
@@ -259,14 +308,34 @@ export default function Reports() {
   });
 
   // Total stats
-  const totalRevenue = invoices
+  const totalRevenue = filteredInvoices
     .filter((inv) => inv.status === "paid")
     .reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
-  const totalPatients = patients.length;
-  const totalAppointments = appointments.length;
+  const totalPatients = filteredPatients.length;
+  const totalAppointments = filteredAppointments.length;
   const lowStockItems = inventory.filter(
     (p) => (p.stock_quantity || 0) <= (p.min_stock_level || 10)
   ).length;
+
+  // Export data
+  const exportData = {
+    revenueByBranch,
+    patientsByBranch,
+    categoryData,
+    summary: {
+      totalRevenue,
+      totalPatients,
+      totalAppointments,
+      lowStockItems,
+    },
+  };
+
+  const resetDateRange = () => {
+    setDateRange({
+      from: subDays(new Date(), 30),
+      to: new Date(),
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -277,10 +346,16 @@ export default function Reports() {
             Analytics and insights for all branches
           </p>
         </div>
-        <Button className="gap-2">
-          <FileText className="h-4 w-4" />
-          Custom Report
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <DateRangePicker
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+          />
+          <Button variant="outline" size="icon" onClick={resetDateRange} title="Reset to last 30 days">
+            <RotateCcw className="h-4 w-4" />
+          </Button>
+          <ExportButton data={exportData} dateRange={dateRange} />
+        </div>
       </div>
 
       {/* Key Metrics */}
@@ -308,7 +383,7 @@ export default function Reports() {
                 <Users className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Patients</p>
+                <p className="text-sm text-muted-foreground">New Patients</p>
                 <p className="text-2xl font-bold text-foreground">{totalPatients}</p>
               </div>
             </div>
@@ -351,7 +426,7 @@ export default function Reports() {
           <CardHeader>
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
-              Revenue Trend (Last 7 Days)
+              Revenue Trend
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -577,7 +652,7 @@ export default function Reports() {
         <CardContent>
           <div className="space-y-4">
             {revenueByBranch.map((branch) => {
-              const branchPatients = patients.filter(
+              const branchPatients = filteredPatients.filter(
                 (p) => p.branch_id === branches.find((b) => b.name === branch.name)?.id
               ).length;
               const maxRevenue = Math.max(...revenueByBranch.map((b) => b.revenue), 1);

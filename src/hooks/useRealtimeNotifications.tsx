@@ -2,7 +2,7 @@ import { useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Calendar, Package, CreditCard, AlertTriangle } from "lucide-react";
+import { useNotificationStore } from "@/hooks/useNotificationStore";
 
 interface NotificationPayload {
   eventType: string;
@@ -13,6 +13,7 @@ interface NotificationPayload {
 export function useRealtimeNotifications() {
   const { toast } = useToast();
   const { profile, isSuperAdmin } = useAuth();
+  const { addNotification, notifications, markAsRead, markAllAsRead, clearNotification, clearAllNotifications } = useNotificationStore();
 
   const handleAppointmentChange = useCallback(
     (payload: NotificationPayload) => {
@@ -22,18 +23,37 @@ export function useRealtimeNotifications() {
           appointment_time?: string;
           type?: string;
         };
+        const description = `${newAppointment?.type || "Consultation"} scheduled for ${newAppointment?.appointment_date} at ${newAppointment?.appointment_time}`;
+        
+        addNotification({
+          type: "appointment",
+          title: "📅 New Appointment Booked",
+          description,
+        });
+        
         toast({
           title: "📅 New Appointment Booked",
-          description: `${newAppointment?.type || "Consultation"} scheduled for ${newAppointment?.appointment_date} at ${newAppointment?.appointment_time}`,
+          description,
         });
       } else if (payload.eventType === "UPDATE") {
         const updated = payload.new as { status?: string };
         if (updated?.status === "completed") {
+          addNotification({
+            type: "appointment",
+            title: "✅ Appointment Completed",
+            description: "An appointment has been marked as completed",
+          });
           toast({
             title: "✅ Appointment Completed",
             description: "An appointment has been marked as completed",
           });
         } else if (updated?.status === "cancelled") {
+          addNotification({
+            type: "appointment",
+            title: "❌ Appointment Cancelled",
+            description: "An appointment has been cancelled",
+            variant: "destructive",
+          });
           toast({
             title: "❌ Appointment Cancelled",
             description: "An appointment has been cancelled",
@@ -42,7 +62,7 @@ export function useRealtimeNotifications() {
         }
       }
     },
-    [toast]
+    [toast, addNotification]
   );
 
   const handleInventoryChange = useCallback(
@@ -60,6 +80,12 @@ export function useRealtimeNotifications() {
 
       if (stockQty <= minLevel * 0.3) {
         // Critical stock (30% of min)
+        addNotification({
+          type: "inventory",
+          title: "🚨 Critical Stock Alert",
+          description: `${product.name} is critically low (${stockQty} remaining)`,
+          variant: "destructive",
+        });
         toast({
           title: "🚨 Critical Stock Alert",
           description: `${product.name} is critically low (${stockQty} remaining)`,
@@ -67,13 +93,18 @@ export function useRealtimeNotifications() {
         });
       } else if (stockQty <= minLevel) {
         // Low stock
+        addNotification({
+          type: "inventory",
+          title: "⚠️ Low Stock Warning",
+          description: `${product.name} is running low (${stockQty} remaining)`,
+        });
         toast({
           title: "⚠️ Low Stock Warning",
           description: `${product.name} is running low (${stockQty} remaining)`,
         });
       }
     },
-    [toast]
+    [toast, addNotification]
   );
 
   const handleInvoiceChange = useCallback(
@@ -83,6 +114,11 @@ export function useRealtimeNotifications() {
           invoice_number?: string;
           total?: number;
         };
+        addNotification({
+          type: "payment",
+          title: "💰 New Invoice Created",
+          description: `Invoice ${invoice?.invoice_number || ""} for KES ${invoice?.total?.toLocaleString() || 0}`,
+        });
         toast({
           title: "💰 New Invoice Created",
           description: `Invoice ${invoice?.invoice_number || ""} for KES ${invoice?.total?.toLocaleString() || 0}`,
@@ -94,6 +130,11 @@ export function useRealtimeNotifications() {
           total?: number;
         };
         if (updated?.status === "paid") {
+          addNotification({
+            type: "payment",
+            title: "💳 Payment Received",
+            description: `Invoice ${updated?.invoice_number || ""} paid - KES ${updated?.total?.toLocaleString() || 0}`,
+          });
           toast({
             title: "💳 Payment Received",
             description: `Invoice ${updated?.invoice_number || ""} paid - KES ${updated?.total?.toLocaleString() || 0}`,
@@ -101,7 +142,7 @@ export function useRealtimeNotifications() {
         }
       }
     },
-    [toast]
+    [toast, addNotification]
   );
 
   useEffect(() => {
@@ -179,4 +220,12 @@ export function useRealtimeNotifications() {
     handleInventoryChange,
     handleInvoiceChange,
   ]);
+
+  return {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    clearNotification,
+    clearAllNotifications,
+  };
 }
