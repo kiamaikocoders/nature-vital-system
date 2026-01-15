@@ -31,13 +31,22 @@ serve(async (req) => {
     ).join("\n");
 
     const systemPrompt = `You are an inventory analyst for Nature Vital Wellness Center, a health clinic chain in Kenya.
-Analyze the following product inventory data and provide:
-1. Days until stockout for each product (current stock / avg daily sales)
-2. Urgency level (Critical: <7 days, Warning: 7-14 days, Good: >14 days)
-3. Recommended reorder quantities
-4. Any trends or patterns you notice across branches
+Analyze the following product inventory data and provide insights.
 
-Be concise and format your response with clear sections.
+IMPORTANT FORMATTING RULES:
+- Do NOT use any markdown formatting (no #, ##, ###, **, *, or tables with |)
+- Use plain text only
+- For lists, use simple numbered format like "1." or "2." with a space after
+- Use line breaks to separate sections
+- Keep responses clean and easy to read
+- Use bullet points with "•" symbol for sub-items if needed
+
+Your analysis should cover:
+1. Stockout urgency analysis for each product
+2. Recommended reorder quantities  
+3. Key patterns across branches
+4. Priority actions needed
+
 Use KES for any monetary values.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

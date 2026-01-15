@@ -34,10 +34,49 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import { format, subDays, eachDayOfInterval, isWithinInterval, parseISO, startOfDay, endOfDay } from "date-fns";
+import { format, subDays, subMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, subQuarters, endOfQuarter, eachDayOfInterval, isWithinInterval, parseISO } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ExportButton } from "@/components/reports/ExportButton";
+
+type DatePreset = {
+  label: string;
+  getValue: () => DateRange;
+};
+
+const datePresets: DatePreset[] = [
+  {
+    label: "Today",
+    getValue: () => ({
+      from: startOfDay(new Date()),
+      to: endOfDay(new Date()),
+    }),
+  },
+  {
+    label: "This Week",
+    getValue: () => ({
+      from: startOfWeek(new Date(), { weekStartsOn: 1 }),
+      to: endOfWeek(new Date(), { weekStartsOn: 1 }),
+    }),
+  },
+  {
+    label: "This Month",
+    getValue: () => ({
+      from: startOfMonth(new Date()),
+      to: endOfMonth(new Date()),
+    }),
+  },
+  {
+    label: "Last Quarter",
+    getValue: () => {
+      const lastQuarter = subQuarters(new Date(), 1);
+      return {
+        from: startOfQuarter(lastQuarter),
+        to: endOfQuarter(lastQuarter),
+      };
+    },
+  },
+];
 
 const reportTypes = [
   {
@@ -347,6 +386,19 @@ export default function Reports() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {datePresets.map((preset) => (
+              <Button
+                key={preset.label}
+                variant="outline"
+                size="sm"
+                onClick={() => setDateRange(preset.getValue())}
+                className="whitespace-nowrap"
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
           <DateRangePicker
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
