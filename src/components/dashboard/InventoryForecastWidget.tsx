@@ -18,6 +18,63 @@ interface Prediction {
   stockoutDate: string;
 }
 
+// Clean markdown from AI responses and format nicely
+function FormattedAnalysis({ text }: { text: string }) {
+  // Remove markdown formatting
+  const cleanText = text
+    .replace(/#{1,6}\s*/g, '') // Remove # headers
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold **text**
+    .replace(/\*(.*?)\*/g, '$1') // Remove italic *text*
+    .replace(/\|[^\n]+\|/g, '') // Remove table rows
+    .replace(/\|?:?-+:?\|?/g, '') // Remove table separators
+    .replace(/^\s*[-*]\s+/gm, '• ') // Convert - or * list items to bullet
+    .replace(/\n{3,}/g, '\n\n') // Reduce multiple newlines
+    .trim();
+
+  // Split into paragraphs
+  const paragraphs = cleanText.split(/\n\n+/);
+
+  return (
+    <div className="space-y-3">
+      {paragraphs.map((paragraph, idx) => {
+        const lines = paragraph.split('\n').filter(line => line.trim());
+        
+        return (
+          <div key={idx} className="space-y-1">
+            {lines.map((line, lineIdx) => {
+              const trimmedLine = line.trim();
+              
+              // Check if it's a numbered item
+              const numberedMatch = trimmedLine.match(/^(\d+)\.\s*(.+)/);
+              if (numberedMatch) {
+                return (
+                  <div key={lineIdx} className="flex gap-2">
+                    <span className="text-primary font-medium min-w-[20px]">{numberedMatch[1]}.</span>
+                    <span>{numberedMatch[2]}</span>
+                  </div>
+                );
+              }
+              
+              // Check if it's a bullet item
+              if (trimmedLine.startsWith('•')) {
+                return (
+                  <div key={lineIdx} className="flex gap-2 pl-4">
+                    <span className="text-muted-foreground">•</span>
+                    <span>{trimmedLine.substring(1).trim()}</span>
+                  </div>
+                );
+              }
+              
+              // Regular text
+              return <p key={lineIdx}>{trimmedLine}</p>;
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // Mock data for demonstration - in production this would come from the database
 const mockProducts = [
   { name: "PureFlow Detox", currentStock: 12, avgDailySales: 2.5, minStockLevel: 20, branch: "Machakos" },
@@ -172,8 +229,8 @@ export function InventoryForecastWidget() {
                   <Brain className="h-4 w-4 text-primary" />
                   AI Analysis
                 </h4>
-                <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed max-h-[200px] overflow-y-auto">
-                  {analysis}
+                <div className="text-sm text-foreground leading-relaxed max-h-[200px] overflow-y-auto">
+                  <FormattedAnalysis text={analysis} />
                 </div>
               </div>
             )}
