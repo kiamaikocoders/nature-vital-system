@@ -4,14 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Truck, MapPin, Calendar, Package, Plus } from "lucide-react";
+import { Truck, MapPin, Calendar, Package, UserCheck, RefreshCw, ClipboardList } from "lucide-react";
 import { MobileUnitsTab } from "@/components/mobile-clinic/MobileUnitsTab";
 import { LocationsTab } from "@/components/mobile-clinic/LocationsTab";
 import { RouteCalendar } from "@/components/mobile-clinic/RouteCalendar";
 import { InventoryTransfersTab } from "@/components/mobile-clinic/InventoryTransfersTab";
-
+import { MobileAppointmentsTab } from "@/components/mobile-clinic/MobileAppointmentsTab";
+import { MobileUnitInventoryTab } from "@/components/mobile-clinic/MobileUnitInventoryTab";
+import { RecurringSchedulesTab } from "@/components/mobile-clinic/RecurringSchedulesTab";
+import { MobileCheckIn } from "@/components/mobile-clinic/MobileCheckIn";
 export default function MobileClinic() {
   const { isSuperAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState("calendar");
@@ -90,19 +92,35 @@ export default function MobileClinic() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="calendar">Route Calendar</TabsTrigger>
+          <TabsTrigger value="appointments">Appointments</TabsTrigger>
+          <TabsTrigger value="checkin">Check-In</TabsTrigger>
           <TabsTrigger value="units">Mobile Units</TabsTrigger>
+          <TabsTrigger value="inventory">Unit Inventory</TabsTrigger>
           <TabsTrigger value="locations">Locations</TabsTrigger>
-          <TabsTrigger value="transfers">Inventory Transfers</TabsTrigger>
+          <TabsTrigger value="transfers">Transfers</TabsTrigger>
+          <TabsTrigger value="schedules">Recurring</TabsTrigger>
         </TabsList>
 
         <TabsContent value="calendar" className="mt-4">
           <RouteCalendar />
         </TabsContent>
 
+        <TabsContent value="appointments" className="mt-4">
+          <MobileAppointmentsTab />
+        </TabsContent>
+
+        <TabsContent value="checkin" className="mt-4">
+          <MobileCheckIn />
+        </TabsContent>
+
         <TabsContent value="units" className="mt-4">
           <MobileUnitsTab />
+        </TabsContent>
+
+        <TabsContent value="inventory" className="mt-4">
+          <MobileUnitInventoryTab />
         </TabsContent>
 
         <TabsContent value="locations" className="mt-4">
@@ -111,6 +129,10 @@ export default function MobileClinic() {
 
         <TabsContent value="transfers" className="mt-4">
           <InventoryTransfersTab />
+        </TabsContent>
+
+        <TabsContent value="schedules" className="mt-4">
+          <RecurringSchedulesTab />
         </TabsContent>
       </Tabs>
     </div>
