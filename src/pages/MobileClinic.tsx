@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Truck, MapPin, Calendar, Package, UserCheck, RefreshCw, ClipboardList } from "lucide-react";
+import { Truck, MapPin, Calendar, Package, UserCheck, RefreshCw, ClipboardList, Pill, LayoutDashboard } from "lucide-react";
 import { MobileUnitsTab } from "@/components/mobile-clinic/MobileUnitsTab";
 import { LocationsTab } from "@/components/mobile-clinic/LocationsTab";
 import { RouteCalendar } from "@/components/mobile-clinic/RouteCalendar";
@@ -14,9 +14,12 @@ import { MobileAppointmentsTab } from "@/components/mobile-clinic/MobileAppointm
 import { MobileUnitInventoryTab } from "@/components/mobile-clinic/MobileUnitInventoryTab";
 import { RecurringSchedulesTab } from "@/components/mobile-clinic/RecurringSchedulesTab";
 import { MobileCheckIn } from "@/components/mobile-clinic/MobileCheckIn";
+import { MobilePrescriptionDispensing } from "@/components/mobile-clinic/MobilePrescriptionDispensing";
+import { MobileClinicDashboard } from "@/components/mobile-clinic/MobileClinicDashboard";
+
 export default function MobileClinic() {
   const { isSuperAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState("calendar");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   const { data: stats } = useQuery({
     queryKey: ["mobile-clinic-stats"],
@@ -93,15 +96,27 @@ export default function MobileClinic() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap h-auto gap-1">
-          <TabsTrigger value="calendar">Route Calendar</TabsTrigger>
+          <TabsTrigger value="dashboard">
+            <LayoutDashboard className="h-4 w-4 mr-1" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="appointments">Appointments</TabsTrigger>
           <TabsTrigger value="checkin">Check-In</TabsTrigger>
-          <TabsTrigger value="units">Mobile Units</TabsTrigger>
-          <TabsTrigger value="inventory">Unit Inventory</TabsTrigger>
+          <TabsTrigger value="dispensing">
+            <Pill className="h-4 w-4 mr-1" />
+            Dispensing
+          </TabsTrigger>
+          <TabsTrigger value="units">Units</TabsTrigger>
+          <TabsTrigger value="inventory">Inventory</TabsTrigger>
           <TabsTrigger value="locations">Locations</TabsTrigger>
           <TabsTrigger value="transfers">Transfers</TabsTrigger>
           <TabsTrigger value="schedules">Recurring</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard" className="mt-4">
+          <MobileClinicDashboard />
+        </TabsContent>
 
         <TabsContent value="calendar" className="mt-4">
           <RouteCalendar />
@@ -113,6 +128,10 @@ export default function MobileClinic() {
 
         <TabsContent value="checkin" className="mt-4">
           <MobileCheckIn />
+        </TabsContent>
+
+        <TabsContent value="dispensing" className="mt-4">
+          <MobilePrescriptionDispensing />
         </TabsContent>
 
         <TabsContent value="units" className="mt-4">
