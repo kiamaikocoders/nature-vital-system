@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Activity,
   LogOut,
+  Truck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
@@ -22,6 +23,7 @@ const navItems = [
   { title: "Patients", url: "/patients", icon: Users },
   { title: "Appointments", url: "/appointments", icon: Calendar },
   { title: "Pharmacy", url: "/pharmacy", icon: Pill },
+  { title: "Mobile Clinic", url: "/mobile-clinic", icon: Truck },
   { title: "Billing", url: "/billing", icon: Receipt },
   { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
