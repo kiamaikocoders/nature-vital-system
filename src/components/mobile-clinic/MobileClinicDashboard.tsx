@@ -32,13 +32,13 @@ import {
 } from "recharts";
 import {
   Users,
-  IndianRupee,
   Package,
   TrendingUp,
   Calendar,
   MapPin,
   Stethoscope,
   Activity,
+  Banknote,
 } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 
@@ -236,12 +236,12 @@ export function MobileClinicDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <IndianRupee className="h-4 w-4 text-muted-foreground" />
+            <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{totalRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">KES {totalRevenue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              Consultations: ₹{consultationRevenue.toLocaleString()}
+              Consultations: KES {consultationRevenue.toLocaleString()}
             </p>
           </CardContent>
         </Card>
@@ -252,7 +252,7 @@ export function MobileClinicDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">₹{medicineRevenue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">KES {medicineRevenue.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               {itemsDispensed} items dispensed
             </p>
@@ -291,7 +291,7 @@ export function MobileClinicDashboard() {
                   <XAxis dataKey="city" className="text-xs" />
                   <YAxis className="text-xs" />
                   <Tooltip 
-                    formatter={(value: any) => [`₹${value.toLocaleString()}`, "Revenue"]}
+                    formatter={(value: any) => [`KES ${value.toLocaleString()}`, "Revenue"]}
                     contentStyle={{ 
                       backgroundColor: "hsl(var(--popover))",
                       border: "1px solid hsl(var(--border))",
@@ -414,7 +414,7 @@ export function MobileClinicDashboard() {
                   <TableRow key={product.name}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell className="text-right">{product.quantity}</TableCell>
-                    <TableCell className="text-right">₹{product.revenue.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">KES {product.revenue.toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
                 {!topProducts.length && (
