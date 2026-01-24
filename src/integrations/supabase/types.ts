@@ -239,6 +239,72 @@ export type Database = {
           },
         ]
       }
+      mobile_appointments: {
+        Row: {
+          appointment_time: string
+          check_in_time: string | null
+          chief_complaint: string | null
+          created_at: string | null
+          diagnosis: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          prescriptions: Json | null
+          session_id: string
+          status: string | null
+          treatment: string | null
+          updated_at: string | null
+          vitals: Json | null
+        }
+        Insert: {
+          appointment_time: string
+          check_in_time?: string | null
+          chief_complaint?: string | null
+          created_at?: string | null
+          diagnosis?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          prescriptions?: Json | null
+          session_id: string
+          status?: string | null
+          treatment?: string | null
+          updated_at?: string | null
+          vitals?: Json | null
+        }
+        Update: {
+          appointment_time?: string
+          check_in_time?: string | null
+          chief_complaint?: string | null
+          created_at?: string | null
+          diagnosis?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          prescriptions?: Json | null
+          session_id?: string
+          status?: string | null
+          treatment?: string | null
+          updated_at?: string | null
+          vitals?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_appointments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobile_inventory_transfers: {
         Row: {
           created_at: string | null
@@ -352,6 +418,64 @@ export type Database = {
           notes?: string | null
         }
         Relationships: []
+      }
+      mobile_schedule_templates: {
+        Row: {
+          created_at: string | null
+          day_of_week: number
+          doctor_id: string | null
+          end_time: string
+          id: string
+          is_active: boolean | null
+          location_id: string
+          mobile_unit_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: number
+          doctor_id?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          location_id: string
+          mobile_unit_id: string
+          start_time?: string
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: number
+          doctor_id?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          location_id?: string
+          mobile_unit_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_schedule_templates_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_schedule_templates_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_schedule_templates_mobile_unit_id_fkey"
+            columns: ["mobile_unit_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mobile_sessions: {
         Row: {
