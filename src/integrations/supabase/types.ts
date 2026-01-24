@@ -239,6 +239,271 @@ export type Database = {
           },
         ]
       }
+      mobile_inventory_transfers: {
+        Row: {
+          created_at: string | null
+          from_branch_id: string
+          id: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          session_id: string | null
+          status: string | null
+          to_mobile_unit_id: string
+          transfer_date: string | null
+          transferred_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          from_branch_id: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          quantity: number
+          session_id?: string | null
+          status?: string | null
+          to_mobile_unit_id: string
+          transfer_date?: string | null
+          transferred_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          from_branch_id?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          session_id?: string | null
+          status?: string | null
+          to_mobile_unit_id?: string
+          transfer_date?: string | null
+          transferred_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_inventory_transfers_from_branch_id_fkey"
+            columns: ["from_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_inventory_transfers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_inventory_transfers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_inventory_transfers_to_mobile_unit_id_fkey"
+            columns: ["to_mobile_unit_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_inventory_transfers_transferred_by_fkey"
+            columns: ["transferred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_locations: {
+        Row: {
+          address: string | null
+          city: string
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          notes?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      mobile_sessions: {
+        Row: {
+          created_at: string | null
+          doctor_id: string | null
+          end_time: string
+          id: string
+          location_id: string
+          mobile_unit_id: string
+          notes: string | null
+          session_date: string
+          start_time: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id?: string | null
+          end_time?: string
+          id?: string
+          location_id: string
+          mobile_unit_id: string
+          notes?: string | null
+          session_date: string
+          start_time?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string | null
+          end_time?: string
+          id?: string
+          location_id?: string
+          mobile_unit_id?: string
+          notes?: string | null
+          session_date?: string
+          start_time?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_sessions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_sessions_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_sessions_mobile_unit_id_fkey"
+            columns: ["mobile_unit_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_unit_inventory: {
+        Row: {
+          id: string
+          last_updated: string | null
+          mobile_unit_id: string
+          product_id: string
+          quantity: number | null
+        }
+        Insert: {
+          id?: string
+          last_updated?: string | null
+          mobile_unit_id: string
+          product_id: string
+          quantity?: number | null
+        }
+        Update: {
+          id?: string
+          last_updated?: string | null
+          mobile_unit_id?: string
+          product_id?: string
+          quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_unit_inventory_mobile_unit_id_fkey"
+            columns: ["mobile_unit_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_unit_inventory_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_units: {
+        Row: {
+          assigned_doctor_id: string | null
+          created_at: string | null
+          home_branch_id: string
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          vehicle_registration: string | null
+        }
+        Insert: {
+          assigned_doctor_id?: string | null
+          created_at?: string | null
+          home_branch_id: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          vehicle_registration?: string | null
+        }
+        Update: {
+          assigned_doctor_id?: string | null
+          created_at?: string | null
+          home_branch_id?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          vehicle_registration?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_units_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_units_home_branch_id_fkey"
+            columns: ["home_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_visits: {
         Row: {
           appointment_id: string | null

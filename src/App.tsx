@@ -11,11 +11,11 @@ import PatientProfile from "./pages/PatientProfile";
 import RegisterPatient from "./pages/RegisterPatient";
 import Appointments from "./pages/Appointments";
 import Pharmacy from "./pages/Pharmacy";
+import MobileClinic from "./pages/MobileClinic";
 import Billing from "./pages/Billing";
 import Reports from "./pages/Reports";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -46,6 +46,7 @@ function AppRoutes() {
       <Route path="/patients/:id" element={<ProtectedRoute><PatientProfile /></ProtectedRoute>} />
       <Route path="/appointments" element={<ProtectedRoute><Appointments /></ProtectedRoute>} />
       <Route path="/pharmacy" element={<ProtectedRoute><Pharmacy /></ProtectedRoute>} />
+      <Route path="/mobile-clinic" element={<ProtectedRoute><MobileClinic /></ProtectedRoute>} />
       <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
