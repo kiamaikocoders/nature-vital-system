@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -34,12 +33,12 @@ import {
   Plus,
   Trash2,
   Printer,
-  CreditCard,
   Check,
   Package,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { PrintReceiptDialog } from "./PrintReceiptDialog";
 
 interface PrescriptionItem {
   productId: string;
@@ -56,6 +55,8 @@ export function MobilePrescriptionDispensing() {
   const [selectedSession, setSelectedSession] = useState<string>("");
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [showDispenseDialog, setShowDispenseDialog] = useState(false);
+  const [showPrintDialog, setShowPrintDialog] = useState(false);
+  const [receiptData, setReceiptData] = useState<any>(null);
   const [prescriptionItems, setPrescriptionItems] = useState<PrescriptionItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
@@ -285,7 +286,31 @@ export function MobilePrescriptionDispensing() {
       toast.success("Prescription dispensed and payment recorded");
       queryClient.invalidateQueries({ queryKey: ["unit-inventory-dispensing"] });
       queryClient.invalidateQueries({ queryKey: ["dispensed-items"] });
+      
+      // Prepare receipt data
+      const session = todaySessions?.find(s => s.id === selectedSession);
+      const receipt = {
+        invoiceNumber: `MCR-${Date.now().toString().slice(-8)}`,
+        patientName: `${selectedAppointment.patient?.first_name} ${selectedAppointment.patient?.last_name}`,
+        patientCode: selectedAppointment.patient?.patient_code || "N/A",
+        sessionLocation: `${session?.location?.name}, ${session?.location?.city}`,
+        sessionDate: session?.session_date,
+        items: prescriptionItems.map(p => ({
+          name: p.productName,
+          quantity: p.quantity,
+          unitPrice: p.unitPrice,
+          total: p.totalPrice,
+        })),
+        consultationFee,
+        medicineTotal,
+        grandTotal,
+        paymentMethod,
+        paidAt: new Date().toISOString(),
+      };
+      setReceiptData(receipt);
+      
       setShowDispenseDialog(false);
+      setShowPrintDialog(true);
       resetForm();
     },
     onError: (error: any) => {
@@ -449,8 +474,8 @@ export function MobilePrescriptionDispensing() {
                     <TableRow key={item.productId}>
                       <TableCell>{item.productName}</TableCell>
                       <TableCell className="text-right">{item.quantity}</TableCell>
-                      <TableCell className="text-right">₹{item.unitPrice}</TableCell>
-                      <TableCell className="text-right">₹{item.totalPrice}</TableCell>
+                      <TableCell className="text-right">KES {item.unitPrice}</TableCell>
+                      <TableCell className="text-right">KES {item.totalPrice}</TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
@@ -479,11 +504,11 @@ export function MobilePrescriptionDispensing() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span>Medicine Total</span>
-                <span>₹{medicineTotal.toFixed(2)}</span>
+                <span>KES {medicineTotal.toFixed(2)}</span>
               </div>
               <div className="flex items-center justify-between font-bold text-lg border-t pt-2">
                 <span>Grand Total</span>
-                <span>₹{grandTotal.toFixed(2)}</span>
+                <span>KES {grandTotal.toFixed(2)}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Label>Payment</Label>
@@ -493,7 +518,7 @@ export function MobilePrescriptionDispensing() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="upi">UPI</SelectItem>
+                    <SelectItem value="mpesa">M-Pesa</SelectItem>
                     <SelectItem value="card">Card</SelectItem>
                   </SelectContent>
                 </Select>
@@ -510,11 +535,18 @@ export function MobilePrescriptionDispensing() {
               disabled={dispenseMutation.isPending}
             >
               <Check className="mr-2 h-4 w-4" />
-              Dispense & Collect ₹{grandTotal.toFixed(2)}
+              Dispense & Collect KES {grandTotal.toFixed(2)}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Print Receipt Dialog */}
+      <PrintReceiptDialog
+        open={showPrintDialog}
+        onOpenChange={setShowPrintDialog}
+        receiptData={receiptData}
+      />
     </div>
   );
 }

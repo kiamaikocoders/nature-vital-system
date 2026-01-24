@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Package, ArrowRight } from "lucide-react";
+import { Plus, Package, ArrowRight, Undo2 } from "lucide-react";
 import { CreateTransferDialog } from "./CreateTransferDialog";
+import { InventoryReturnDialog } from "./InventoryReturnDialog";
 import { format } from "date-fns";
 
 interface Transfer {
@@ -31,9 +32,9 @@ const statusColors: Record<string, "default" | "secondary" | "destructive" | "ou
 };
 
 export function InventoryTransfersTab() {
-  const { isSuperAdmin, profile } = useAuth();
   const { toast } = useToast();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showReturnDialog, setShowReturnDialog] = useState(false);
 
   const { data: transfers, refetch } = useQuery({
     queryKey: ["mobile-inventory-transfers"],
@@ -118,10 +119,16 @@ export function InventoryTransfersTab() {
           <Package className="h-5 w-5" />
           Inventory Transfers
         </CardTitle>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Create Transfer
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setShowReturnDialog(true)}>
+            <Undo2 className="mr-2 h-4 w-4" />
+            Return Stock
+          </Button>
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Transfer
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -208,6 +215,12 @@ export function InventoryTransfersTab() {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onTransferCreated={refetch}
+      />
+
+      <InventoryReturnDialog
+        open={showReturnDialog}
+        onOpenChange={setShowReturnDialog}
+        onReturnCreated={refetch}
       />
     </Card>
   );
