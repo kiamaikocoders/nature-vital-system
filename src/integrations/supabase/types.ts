@@ -305,6 +305,77 @@ export type Database = {
           },
         ]
       }
+      mobile_dispensing: {
+        Row: {
+          appointment_id: string
+          created_at: string | null
+          dispensed_at: string | null
+          dispensed_by: string | null
+          id: string
+          mobile_unit_id: string
+          notes: string | null
+          product_id: string
+          quantity: number
+          total_price: number | null
+          unit_price: number | null
+        }
+        Insert: {
+          appointment_id: string
+          created_at?: string | null
+          dispensed_at?: string | null
+          dispensed_by?: string | null
+          id?: string
+          mobile_unit_id: string
+          notes?: string | null
+          product_id: string
+          quantity: number
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Update: {
+          appointment_id?: string
+          created_at?: string | null
+          dispensed_at?: string | null
+          dispensed_by?: string | null
+          id?: string
+          mobile_unit_id?: string
+          notes?: string | null
+          product_id?: string
+          quantity?: number
+          total_price?: number | null
+          unit_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_dispensing_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_dispensing_dispensed_by_fkey"
+            columns: ["dispensed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_dispensing_mobile_unit_id_fkey"
+            columns: ["mobile_unit_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_dispensing_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobile_inventory_transfers: {
         Row: {
           created_at: string | null
@@ -473,6 +544,73 @@ export type Database = {
             columns: ["mobile_unit_id"]
             isOneToOne: false
             referencedRelation: "mobile_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mobile_session_invoices: {
+        Row: {
+          appointment_id: string
+          consultation_fee: number | null
+          created_at: string | null
+          id: string
+          medicine_total: number | null
+          paid_at: string | null
+          patient_id: string
+          payment_method: string | null
+          payment_status: string | null
+          session_id: string
+          total_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          appointment_id: string
+          consultation_fee?: number | null
+          created_at?: string | null
+          id?: string
+          medicine_total?: number | null
+          paid_at?: string | null
+          patient_id: string
+          payment_method?: string | null
+          payment_status?: string | null
+          session_id: string
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          appointment_id?: string
+          consultation_fee?: number | null
+          created_at?: string | null
+          id?: string
+          medicine_total?: number | null
+          paid_at?: string | null
+          patient_id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          session_id?: string
+          total_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mobile_session_invoices_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_session_invoices_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mobile_session_invoices_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "mobile_sessions"
             referencedColumns: ["id"]
           },
         ]
