@@ -38,6 +38,9 @@ import { format, subDays, subMonths, startOfDay, endOfDay, startOfWeek, endOfWee
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/reports/DateRangePicker";
 import { ExportButton } from "@/components/reports/ExportButton";
+import { SaveDateRangeDialog } from "@/components/reports/SaveDateRangeDialog";
+import { SavedDateRanges } from "@/components/reports/SavedDateRanges";
+import { useSavedDateRanges } from "@/hooks/useSavedDateRanges";
 
 type DatePreset = {
   label: string;
@@ -123,6 +126,7 @@ const COLORS = [
 
 export default function Reports() {
   const { isSuperAdmin, profile } = useAuth();
+  const { savedRanges, saveRange, deleteRange, getDateRange } = useSavedDateRanges();
   
   // Date range state - default to last 30 days
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -403,12 +407,24 @@ export default function Reports() {
             dateRange={dateRange}
             onDateRangeChange={setDateRange}
           />
+          <SaveDateRangeDialog
+            dateRange={dateRange}
+            onSave={(name) => saveRange(name, dateRange!)}
+          />
           <Button variant="outline" size="icon" onClick={resetDateRange} title="Reset to last 30 days">
             <RotateCcw className="h-4 w-4" />
           </Button>
           <ExportButton data={exportData} dateRange={dateRange} />
         </div>
       </div>
+
+      {/* Saved Date Ranges */}
+      <SavedDateRanges
+        savedRanges={savedRanges}
+        onSelect={setDateRange}
+        onDelete={deleteRange}
+        getDateRange={getDateRange}
+      />
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
