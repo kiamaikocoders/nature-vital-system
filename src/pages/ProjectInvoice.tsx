@@ -7,40 +7,40 @@ const modules = [
   {
     name: "Super Admin Dashboard & RBAC",
     description: "Centralized multi-branch monitoring, aggregated analytics, and AI-powered inventory forecasting for enhanced administrative control.",
-    cost: 185000,
+    cost: 200000,
   },
   {
     name: "Multi-Branch Patient EHR",
     description: "Comprehensive clinical workflows, patient history, and vital signs tracking with secure data isolation across all branches.",
-    cost: 220000,
+    cost: 250000,
   },
   {
     name: "Inventory & Pharmacy Management",
     description: "Real-time stock tracking, batch management, and automated low-stock alerts to optimize pharmacy operations.",
-    cost: 150000,
+    cost: 155000,
   },
   {
     name: "Billing & Invoicing",
     description: "Professional itemized invoicing with M-Pesa/Cash integration and robust financial tracking capabilities.",
-    cost: 95000,
+    cost: 100000,
   },
   {
     name: "Mobile Clinic Operations",
     description: "Advanced management of mobile units, recurring routes, field check-ins, on-site dispensing, and inventory returns.",
-    cost: 280000,
+    cost: 300000,
   },
   {
     name: "Technical Infrastructure",
     description: "Secure cloud backend, Row-Level Security implementation, and responsive cross-device design.",
-    cost: 120000,
+    cost: 150000,
   },
 ];
 
 const timeline = [
   { phase: "Foundation (Auth/Database/RBAC)", duration: "10 days", status: "Completed" },
-  { phase: "Core Modules (EHR/Inventory/Billing)", duration: "16 days", status: "Completed" },
-  { phase: "Mobile Clinic System", duration: "15 days", status: "Completed" },
-  { phase: "Deployment & Training", duration: "15 days", status: "In Progress" },
+  { phase: "Core Modules (EHR/Inventory/Billing)", duration: "16 days", status: "In Progress" },
+  { phase: "Mobile Clinic System", duration: "15 days", status: "In Progress" },
+  { phase: "Deployment & Training", duration: "15 days", status: "Pending" },
 ];
 
 export default function ProjectInvoice() {
@@ -197,11 +197,17 @@ export default function ProjectInvoice() {
                   <p className="text-muted-foreground">
                     <span className="font-medium text-foreground">Accepted Payment Methods:</span>
                   </p>
-                  <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-2">
-                    <li>M-Pesa (Paybill/Till Number)</li>
-                    <li>Bank Transfer (KCB, Equity)</li>
-                    <li>Cheque (Payable to Developer)</li>
-                  </ul>
+                  <div className="text-muted-foreground space-y-2 ml-2">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">M-Pesa Direct:</p>
+                      <p className="text-sm">Send to: <span className="font-mono">0757218793</span></p>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground text-sm">M-Pesa Paybill (Loop):</p>
+                      <p className="text-sm">Business No: <span className="font-mono">714777</span></p>
+                      <p className="text-sm">Account No: <span className="font-mono">0757218793</span></p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -222,7 +228,10 @@ export default function ProjectInvoice() {
             {/* Footer */}
             <div className="border-t border-border pt-6 text-center">
               <p className="text-muted-foreground text-sm">
-                Thank you for choosing our services. For inquiries, please contact the development team.
+                Thank you for choosing our services. For inquiries, please contact:
+              </p>
+              <p className="text-foreground font-medium text-sm mt-1">
+                komuzack@gmail.com
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 This invoice was generated on {invoiceDate} | Nature Vital HIS v1.0
