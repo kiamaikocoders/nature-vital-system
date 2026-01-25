@@ -16,6 +16,7 @@ import Billing from "./pages/Billing";
 import Reports from "./pages/Reports";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ProjectInvoice from "./pages/ProjectInvoice";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -49,6 +50,7 @@ function AppRoutes() {
       <Route path="/mobile-clinic" element={<ProtectedRoute><MobileClinic /></ProtectedRoute>} />
       <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+      <Route path="/project-invoice" element={<ProjectInvoice />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
