@@ -7,32 +7,32 @@ const modules = [
   {
     name: "Super Admin Dashboard & RBAC",
     description: "Centralized multi-branch monitoring, aggregated analytics, and AI-powered inventory forecasting for enhanced administrative control.",
-    cost: 150000,
+    cost: 100000,
   },
   {
     name: "Multi-Branch Patient EHR",
     description: "Comprehensive clinical workflows, patient history, and vital signs tracking with secure data isolation across all branches.",
-    cost: 180000,
+    cost: 130000,
   },
   {
     name: "Inventory & Pharmacy Management",
     description: "Real-time stock tracking, batch management, and automated low-stock alerts to optimize pharmacy operations.",
-    cost: 120000,
+    cost: 80000,
   },
   {
     name: "Billing & Invoicing",
     description: "Financial tracking of M-Pesa and cash payments with professional itemized invoicing.",
-    cost: 80000,
+    cost: 50000,
   },
   {
     name: "Mobile Clinic Operations",
     description: "Advanced management of mobile units, recurring routes, field check-ins, on-site dispensing, and inventory returns.",
-    cost: 170000,
+    cost: 120000,
   },
   {
     name: "Technical Infrastructure",
     description: "Secure cloud backend, Row-Level Security implementation, and responsive cross-device design.",
-    cost: 100000,
+    cost: 70000,
   },
 ];
 
