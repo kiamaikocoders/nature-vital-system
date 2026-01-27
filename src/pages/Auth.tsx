@@ -4,26 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
-
-type AppRole = "super_admin" | "branch_admin" | "doctor" | "pharmacist";
-
-interface Branch {
-  id: string;
-  name: string;
-  location: string;
-}
 
 export default function Auth() {
   const navigate = useNavigate();
   const { user, signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [branches, setBranches] = useState<Branch[]>([]);
   
   // Login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -33,8 +23,6 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<AppRole>("doctor");
-  const [branchId, setBranchId] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -43,12 +31,10 @@ export default function Auth() {
   }, [user, navigate]);
 
   useEffect(() => {
-    const fetchBranches = async () => {
-      const { data } = await supabase.from("branches").select("id, name, location");
-      if (data) setBranches(data);
-    };
-    fetchBranches();
-  }, []);
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +52,7 @@ export default function Auth() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { error } = await signUp(signupEmail, signupPassword, fullName, role, branchId || undefined);
+    const { error } = await signUp(signupEmail, signupPassword, fullName);
     if (error) {
       toast.error(error.message);
     } else {
@@ -158,35 +144,9 @@ export default function Auth() {
                     minLength={6}
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={role} onValueChange={(v) => setRole(v as AppRole)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="branch_admin">Branch Admin</SelectItem>
-                      <SelectItem value="doctor">Doctor</SelectItem>
-                      <SelectItem value="pharmacist">Pharmacist</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="branch">Branch</Label>
-                  <Select value={branchId} onValueChange={setBranchId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select branch" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {branches.map((branch) => (
-                        <SelectItem key={branch.id} value={branch.id}>
-                          {branch.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  New accounts are created with default access. Contact an administrator for role assignment.
+                </p>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>

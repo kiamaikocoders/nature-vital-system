@@ -13,20 +13,123 @@ interface ProductData {
   branch: string;
 }
 
+// Input validation
+function validateInput(body: unknown): { valid: true; data: { products: ProductData[] } } | { valid: false; error: string } {
+  if (typeof body !== 'object' || body === null) {
+    return { valid: false, error: "Request body must be a JSON object" };
+  }
+
+  const input = body as Record<string, unknown>;
+
+  // Validate products array exists
+  if (!Array.isArray(input.products)) {
+    return { valid: false, error: "products is required and must be an array" };
+  }
+
+  // Limit array size to prevent DoS
+  if (input.products.length === 0) {
+    return { valid: false, error: "products array must contain at least 1 item" };
+  }
+  if (input.products.length > 100) {
+    return { valid: false, error: "products array exceeds maximum of 100 items" };
+  }
+
+  const validatedProducts: ProductData[] = [];
+
+  for (let i = 0; i < input.products.length; i++) {
+    const product = input.products[i];
+
+    if (typeof product !== 'object' || product === null) {
+      return { valid: false, error: `products[${i}] must be an object` };
+    }
+
+    const p = product as Record<string, unknown>;
+
+    // Validate name
+    if (typeof p.name !== 'string' || p.name.trim().length === 0) {
+      return { valid: false, error: `products[${i}].name is required and must be a non-empty string` };
+    }
+    if (p.name.length > 200) {
+      return { valid: false, error: `products[${i}].name exceeds maximum length of 200 characters` };
+    }
+
+    // Validate currentStock
+    if (typeof p.currentStock !== 'number' || !Number.isInteger(p.currentStock) || p.currentStock < 0) {
+      return { valid: false, error: `products[${i}].currentStock must be a non-negative integer` };
+    }
+    if (p.currentStock > 1000000) {
+      return { valid: false, error: `products[${i}].currentStock exceeds maximum value of 1000000` };
+    }
+
+    // Validate avgDailySales
+    if (typeof p.avgDailySales !== 'number' || p.avgDailySales < 0) {
+      return { valid: false, error: `products[${i}].avgDailySales must be a non-negative number` };
+    }
+    if (p.avgDailySales > 10000) {
+      return { valid: false, error: `products[${i}].avgDailySales exceeds maximum value of 10000` };
+    }
+
+    // Validate minStockLevel
+    if (typeof p.minStockLevel !== 'number' || !Number.isInteger(p.minStockLevel) || p.minStockLevel < 0) {
+      return { valid: false, error: `products[${i}].minStockLevel must be a non-negative integer` };
+    }
+    if (p.minStockLevel > 10000) {
+      return { valid: false, error: `products[${i}].minStockLevel exceeds maximum value of 10000` };
+    }
+
+    // Validate branch
+    if (typeof p.branch !== 'string' || p.branch.trim().length === 0) {
+      return { valid: false, error: `products[${i}].branch is required and must be a non-empty string` };
+    }
+    if (p.branch.length > 100) {
+      return { valid: false, error: `products[${i}].branch exceeds maximum length of 100 characters` };
+    }
+
+    validatedProducts.push({
+      name: p.name.trim(),
+      currentStock: p.currentStock,
+      avgDailySales: p.avgDailySales,
+      minStockLevel: p.minStockLevel,
+      branch: p.branch.trim()
+    });
+  }
+
+  return { valid: true, data: { products: validatedProducts } };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { products } = await req.json();
+    // Parse and validate input
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const validation = validateInput(body);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { products } = validation.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const productSummary = (products as ProductData[]).map(p => 
+    const productSummary = products.map(p => 
       `- ${p.name} at ${p.branch}: ${p.currentStock} units, avg ${p.avgDailySales.toFixed(1)} sales/day, min level: ${p.minStockLevel}`
     ).join("\n");
 
@@ -85,7 +188,7 @@ Use KES for any monetary values.`;
     const analysis = data.choices?.[0]?.message?.content || "Unable to generate forecast.";
 
     // Calculate basic predictions
-    const predictions = (products as ProductData[]).map(p => {
+    const predictions = products.map(p => {
       const daysUntilStockout = p.avgDailySales > 0 ? Math.floor(p.currentStock / p.avgDailySales) : 999;
       const urgency = daysUntilStockout < 7 ? "critical" : daysUntilStockout < 14 ? "warning" : "good";
       const reorderQty = Math.ceil(p.avgDailySales * 30); // 30-day supply
