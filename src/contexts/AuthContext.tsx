@@ -19,7 +19,7 @@ interface AuthContextType {
   profile: Profile | null;
   roles: AppRole[];
   isLoading: boolean;
-  signUp: (email: string, password: string, fullName: string, role: AppRole, branchId?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   hasRole: (role: AppRole) => boolean;
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: AppRole, branchId?: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -96,23 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (authError) throw authError;
       if (!authData.user) throw new Error("No user returned");
 
-      // Create profile
+      // Create profile - the database trigger will auto-assign the default 'doctor' role
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: authData.user.id,
         full_name: fullName,
         email,
-        branch_id: branchId || null,
       });
 
       if (profileError) throw profileError;
-
-      // Create role
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: authData.user.id,
-        role,
-      });
-
-      if (roleError) throw roleError;
 
       return { error: null };
     } catch (error) {

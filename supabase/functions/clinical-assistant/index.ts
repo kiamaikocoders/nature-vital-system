@@ -44,13 +44,75 @@ const NATURE_VITAL_PRODUCTS = [
   }
 ];
 
+// Input validation schema
+interface ClinicalAssistantInput {
+  symptoms: string;
+  patientHistory?: string;
+}
+
+function validateInput(body: unknown): { valid: true; data: ClinicalAssistantInput } | { valid: false; error: string } {
+  if (typeof body !== 'object' || body === null) {
+    return { valid: false, error: "Request body must be a JSON object" };
+  }
+
+  const input = body as Record<string, unknown>;
+
+  // Validate symptoms - required, string, max 5000 chars
+  if (typeof input.symptoms !== 'string') {
+    return { valid: false, error: "symptoms is required and must be a string" };
+  }
+  if (input.symptoms.trim().length === 0) {
+    return { valid: false, error: "symptoms cannot be empty" };
+  }
+  if (input.symptoms.length > 5000) {
+    return { valid: false, error: "symptoms exceeds maximum length of 5000 characters" };
+  }
+
+  // Validate patientHistory - optional, string, max 10000 chars
+  if (input.patientHistory !== undefined) {
+    if (typeof input.patientHistory !== 'string') {
+      return { valid: false, error: "patientHistory must be a string" };
+    }
+    if (input.patientHistory.length > 10000) {
+      return { valid: false, error: "patientHistory exceeds maximum length of 10000 characters" };
+    }
+  }
+
+  return {
+    valid: true,
+    data: {
+      symptoms: input.symptoms.trim(),
+      patientHistory: typeof input.patientHistory === 'string' ? input.patientHistory.trim() : undefined
+    }
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { symptoms, patientHistory } = await req.json();
+    // Parse and validate input
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const validation = validateInput(body);
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { symptoms, patientHistory } = validation.data;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
