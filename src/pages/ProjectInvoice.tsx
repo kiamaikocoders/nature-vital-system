@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Printer, Download } from "lucide-react";
+import { ArrowLeft, Printer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -7,40 +7,40 @@ const modules = [
   {
     name: "Super Admin Dashboard & RBAC",
     description: "Centralized multi-branch monitoring, aggregated analytics, and AI-powered inventory forecasting for enhanced administrative control.",
-    cost: 100000,
+    cost: 60000,
   },
   {
     name: "Multi-Branch Patient EHR",
     description: "Comprehensive clinical workflows, patient history, and vital signs tracking with secure data isolation across all branches.",
-    cost: 130000,
+    cost: 80000,
   },
   {
     name: "Inventory & Pharmacy Management",
     description: "Real-time stock tracking, batch management, and automated low-stock alerts to optimize pharmacy operations.",
-    cost: 80000,
+    cost: 50000,
   },
   {
     name: "Billing & Invoicing",
     description: "Financial tracking of M-Pesa and cash payments with professional itemized invoicing.",
-    cost: 50000,
+    cost: 30000,
   },
   {
     name: "Mobile Clinic Operations",
     description: "Advanced management of mobile units, recurring routes, field check-ins, on-site dispensing, and inventory returns.",
-    cost: 120000,
+    cost: 45000,
   },
   {
     name: "Technical Infrastructure",
     description: "Secure cloud backend, Row-Level Security implementation, and responsive cross-device design.",
-    cost: 70000,
+    cost: 35000,
   },
 ];
 
 const timeline = [
-  { phase: "Foundation (Auth/Database/RBAC)", duration: "10 days", status: "Completed" },
-  { phase: "Core Modules (EHR/Inventory/Billing)", duration: "16 days", status: "In Progress" },
-  { phase: "Mobile Clinic System", duration: "15 days", status: "In Progress" },
-  { phase: "Deployment & Training", duration: "15 days", status: "Pending" },
+  { phase: "Foundation (Auth / Database / RBAC)", duration: "2 weeks" },
+  { phase: "Core Modules (EHR / Inventory / Billing)", duration: "2.5 weeks" },
+  { phase: "Mobile Clinic System", duration: "1.5 weeks" },
+  { phase: "Deployment & Training", duration: "1 week" },
 ];
 
 export default function ProjectInvoice() {
@@ -102,13 +102,13 @@ export default function ProjectInvoice() {
                 <p className="text-foreground font-medium">Nature Vital Wellness Center</p>
                 <p className="text-muted-foreground">Machakos, Kenya</p>
                 <p className="text-muted-foreground">Multi-Branch Operations:</p>
-                <p className="text-muted-foreground text-sm">Machakos • Kitui • Matuu • Mlolongo • Mobile Units</p>
+                <p className="text-muted-foreground text-sm">1. Wote &bull; Machakos &bull; Kitui &bull; Matuu &bull; Mlolongo &bull; Mobile Units</p>
               </div>
               <div className="text-right">
                 <div className="space-y-1">
                   <p><span className="text-muted-foreground">Invoice Date:</span> <span className="font-medium text-foreground">{invoiceDate}</span></p>
                   <p><span className="text-muted-foreground">Due Date:</span> <span className="font-medium text-foreground">Upon Delivery</span></p>
-                  <p><span className="text-muted-foreground">Project Duration:</span> <span className="font-medium text-foreground">8 Weeks</span></p>
+                  <p><span className="text-muted-foreground">Project Duration:</span> <span className="font-medium text-foreground">7 Weeks</span></p>
                 </div>
               </div>
             </div>
@@ -130,7 +130,6 @@ export default function ProjectInvoice() {
                 <thead>
                   <tr className="border-b-2 border-primary/20">
                     <th className="text-left py-3 text-foreground font-semibold">Module</th>
-                    <th className="text-right py-3 text-foreground font-semibold">Amount (KES)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -140,17 +139,13 @@ export default function ProjectInvoice() {
                         <p className="font-medium text-foreground">{module.name}</p>
                         <p className="text-sm text-muted-foreground mt-1">{module.description}</p>
                       </td>
-                      <td className="text-right py-4 font-medium text-foreground whitespace-nowrap">
-                        KES {module.cost.toLocaleString()}
-                      </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-primary">
-                    <td className="py-4 text-lg font-bold text-foreground">Total Amount</td>
-                    <td className="py-4 text-right text-2xl font-bold text-primary">
-                      KES {totalAmount.toLocaleString()}
+                    <td className="py-4 text-lg font-bold text-foreground">
+                      Total Amount: <span className="text-primary">KES {totalAmount.toLocaleString()}</span>
                     </td>
                   </tr>
                 </tfoot>
@@ -167,13 +162,6 @@ export default function ProjectInvoice() {
                       <p className="font-medium text-foreground text-sm">{item.phase}</p>
                       <p className="text-xs text-muted-foreground">{item.duration}</p>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      item.status === "Completed" 
-                        ? "bg-primary/10 text-primary" 
-                        : "bg-muted text-muted-foreground"
-                    }`}>
-                      {item.status}
-                    </span>
                   </div>
                 ))}
               </div>
