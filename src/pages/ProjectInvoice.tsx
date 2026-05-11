@@ -136,8 +136,8 @@ export default function ProjectInvoice() {
                 </div>
               </div>
               <div className="text-right">
-                <h2 className="text-3xl font-bold text-foreground">INVOICE</h2>
-                <p className="text-muted-foreground mt-1">#{invoiceNumber}</p>
+                <h2 className="text-3xl font-bold text-foreground">PROJECT BREAKDOWN</h2>
+                <p className="text-muted-foreground mt-1">Ref #{invoiceNumber}</p>
               </div>
             </div>
 
