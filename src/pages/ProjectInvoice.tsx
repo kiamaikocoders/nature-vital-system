@@ -37,10 +37,13 @@ const modules = [
 ];
 
 const timeline = [
-  { phase: "Foundation (Auth / Database / RBAC)", duration: "2 weeks" },
-  { phase: "Core Modules (EHR / Inventory / Billing)", duration: "2.5 weeks" },
-  { phase: "Mobile Clinic System", duration: "1.5 weeks" },
-  { phase: "Deployment & Training", duration: "1 week" },
+  { phase: "Week 1", duration: "Foundation — Auth, Database setup & RBAC configuration" },
+  { phase: "Week 2", duration: "Foundation — Admin dashboard, analytics & branch configuration" },
+  { phase: "Week 3", duration: "Core Modules — EHR development & patient workflows" },
+  { phase: "Week 4", duration: "Core Modules — Inventory & pharmacy management" },
+  { phase: "Week 5", duration: "Core Modules — Billing, invoicing & payment integrations" },
+  { phase: "Week 6", duration: "Mobile Clinic — Unit system, routes, field check-ins & dispensing" },
+  { phase: "Week 7", duration: "Deployment & Training — Testing, go-live & user training" },
 ];
 
 export default function ProjectInvoice() {
