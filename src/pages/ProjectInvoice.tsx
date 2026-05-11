@@ -65,7 +65,7 @@ const phases = [
 
 export default function ProjectInvoice() {
   const navigate = useNavigate();
-  const totalAmount = modules.reduce((sum, m) => sum + m.cost, 0);
+  const totalAmount = phases.reduce((sum, p) => sum + p.cost, 0);
   const invoiceDate = new Date().toLocaleDateString("en-KE", {
     year: "numeric",
     month: "long",
