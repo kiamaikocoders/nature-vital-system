@@ -182,11 +182,24 @@ export default function ProjectInvoice() {
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{phase.summary}</p>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
-                      {phase.deliverables.map((d, i) => (
-                        <li key={i}>{d}</li>
-                      ))}
-                    </ul>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-1">Deliverables</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
+                          {phase.deliverables.map((d, i) => (
+                            <li key={i}>{d}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-1">Acceptance Criteria (Definition of Done)</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
+                          {phase.acceptance.map((a, i) => (
+                            <li key={i}>{a}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <div className="border-t-2 border-primary pt-4">
