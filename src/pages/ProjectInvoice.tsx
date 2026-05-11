@@ -16,6 +16,12 @@ const phases = [
       "Reception dashboard for daily intake and queue handover to doctor",
       "Secure multi-branch data isolation (RLS)",
     ],
+    acceptance: [
+      "Reception can register a new patient in under 2 minutes with all required fields validated",
+      "Searching an existing patient returns the correct profile with full visit history",
+      "Registered patient appears instantly on the doctor's queue for the correct branch",
+      "Users from one branch cannot view or edit patients of another branch",
+    ],
   },
   {
     name: "Phase 2 — Doctor Clinical Flow",
@@ -29,6 +35,12 @@ const phases = [
       "Diagnosis with severity classification (Mild / Moderate / Severe)",
       "Treatment & prescription builder forwarded directly to pharmacy",
       "Clinical timeline of every encounter per patient",
+    ],
+    acceptance: [
+      "Doctor can open a queued patient and view complete history within one click",
+      "A visit can be recorded with vitals, diagnosis, severity and prescription saved together",
+      "Submitted prescription appears on the pharmacy queue in real time",
+      "Clinical timeline reflects every past visit in chronological order",
     ],
   },
   {
@@ -45,6 +57,13 @@ const phases = [
       "Batch tracking, expiry alerts and low-stock notifications",
       "Itemized invoicing & M-Pesa payment recording on dispense",
     ],
+    acceptance: [
+      "Pharmacist sees prescriptions immediately after the doctor submits them",
+      "Dispensing a medicine reduces stock by the exact quantity issued",
+      "Restock and top-up entries update availability in real time across the system",
+      "Low-stock and expiry alerts trigger automatically at defined thresholds",
+      "Each dispense produces an itemized invoice with payment recorded against the patient",
+    ],
   },
   {
     name: "Phase 4 — Super Admin Dashboard & Oversight",
@@ -59,6 +78,13 @@ const phases = [
       "Audit trail and real-time activity monitoring",
       "Mobile clinic oversight: units, routes, field dispensing & returns",
       "Deployment, go-live and full team training",
+    ],
+    acceptance: [
+      "Super Admin dashboard shows live KPIs aggregated across all branches",
+      "Super Admin can create, update and deactivate users, roles and branches",
+      "Reports can be filtered by custom date ranges and exported successfully",
+      "Inventory forecasting flags upcoming stockouts based on real sales velocity",
+      "All staff are trained and the system is signed off as live in production",
     ],
   },
 ];
@@ -110,8 +136,8 @@ export default function ProjectInvoice() {
                 </div>
               </div>
               <div className="text-right">
-                <h2 className="text-3xl font-bold text-foreground">INVOICE</h2>
-                <p className="text-muted-foreground mt-1">#{invoiceNumber}</p>
+                <h2 className="text-3xl font-bold text-foreground">PROJECT BREAKDOWN</h2>
+                <p className="text-muted-foreground mt-1">Ref #{invoiceNumber}</p>
               </div>
             </div>
 
@@ -156,11 +182,24 @@ export default function ProjectInvoice() {
                       </div>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{phase.summary}</p>
-                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
-                      {phase.deliverables.map((d, i) => (
-                        <li key={i}>{d}</li>
-                      ))}
-                    </ul>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-1">Deliverables</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
+                          {phase.deliverables.map((d, i) => (
+                            <li key={i}>{d}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-foreground uppercase tracking-wide mb-1">Acceptance Criteria (Definition of Done)</p>
+                        <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
+                          {phase.acceptance.map((a, i) => (
+                            <li key={i}>{a}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <div className="border-t-2 border-primary pt-4">
