@@ -143,47 +143,31 @@ export default function ProjectInvoice() {
               </p>
             </div>
 
-            {/* Modules Table */}
+            {/* Phased Delivery */}
             <div>
-              <h3 className="font-semibold text-foreground mb-4">Development Modules</h3>
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-primary/20">
-                    <th className="text-left py-3 text-foreground font-semibold">Module</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {modules.map((module, index) => (
-                    <tr key={index} className="border-b border-border">
-                      <td className="py-4">
-                        <p className="font-medium text-foreground">{module.name}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{module.description}</p>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t-2 border-primary">
-                    <td className="py-4 text-lg font-bold text-foreground">
-                      Total Amount: <span className="text-primary">KES {totalAmount.toLocaleString()}</span>
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-
-            {/* Timeline */}
-            <div>
-              <h3 className="font-semibold text-foreground mb-4">Implementation Timeline</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {timeline.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                    <div>
-                      <p className="font-medium text-foreground text-sm">{item.phase}</p>
-                      <p className="text-xs text-muted-foreground">{item.duration}</p>
+              <h3 className="font-semibold text-foreground mb-4">Phased Project Delivery</h3>
+              <div className="space-y-4">
+                {phases.map((phase, index) => (
+                  <div key={index} className="rounded-lg border border-border p-4 print:break-inside-avoid">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div>
+                        <p className="font-semibold text-foreground">{phase.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{phase.duration}</p>
+                      </div>
                     </div>
+                    <p className="text-sm text-muted-foreground mb-3">{phase.summary}</p>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-1">
+                      {phase.deliverables.map((d, i) => (
+                        <li key={i}>{d}</li>
+                      ))}
+                    </ul>
                   </div>
                 ))}
+                <div className="border-t-2 border-primary pt-4">
+                  <p className="text-lg font-bold text-foreground text-right">
+                    Total Project Cost: <span className="text-primary">KES {totalAmount.toLocaleString()}</span>
+                  </p>
+                </div>
               </div>
             </div>
 
