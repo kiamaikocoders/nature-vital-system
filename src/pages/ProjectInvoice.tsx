@@ -3,47 +3,64 @@ import { ArrowLeft, Printer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
-const modules = [
+const phases = [
   {
-    name: "Super Admin Dashboard & RBAC",
-    description: "Centralized multi-branch monitoring, aggregated analytics, and AI-powered inventory forecasting for enhanced administrative control.",
-    cost: 60000,
+    name: "Phase 1 — Patient Data Intake (Reception)",
+    duration: "Weeks 1–2",
+    cost: 70000,
+    summary: "Reception-led patient registration and identification flow, ensuring accurate tracking of new and returning patients across all branches.",
+    deliverables: [
+      "Patient registration form with demographics, contacts and next of kin capture",
+      "Returning vs. new patient detection (search by name, phone, ID)",
+      "Unified patient profile with visit history and branch tagging",
+      "Reception dashboard for daily intake and queue handover to doctor",
+      "Secure multi-branch data isolation (RLS)",
+    ],
   },
   {
-    name: "Multi-Branch Patient EHR",
-    description: "Comprehensive clinical workflows, patient history, and vital signs tracking with secure data isolation across all branches.",
+    name: "Phase 2 — Doctor Clinical Flow",
+    duration: "Weeks 3–4",
+    cost: 90000,
+    summary: "Doctor receives patients from reception, reviews history, performs diagnosis, classifies severity, and prescribes medication forwarded to pharmacy.",
+    deliverables: [
+      "Doctor queue showing patients checked in by reception",
+      "Full patient EHR view: history, vitals, allergies, past visits",
+      "New visit form: complaints, examination, vitals capture",
+      "Diagnosis with severity classification (Mild / Moderate / Severe)",
+      "Treatment & prescription builder forwarded directly to pharmacy",
+      "Clinical timeline of every encounter per patient",
+    ],
+  },
+  {
+    name: "Phase 3 — Pharmacy & Stock Management",
+    duration: "Weeks 5–6",
     cost: 80000,
+    summary: "Two parallel flows under pharmacy: (a) dispensing to patients based on doctor's prescription, and (b) stock/logistics management for restocking and availability.",
+    deliverables: [
+      "Pharmacy queue receiving patient + diagnosis + prescription from doctor",
+      "Dispensing flow with quantity, batch and patient acknowledgement",
+      "Automatic stock deduction on dispensing & dispensing record per patient",
+      "Stock management module: add new products, restock, top-ups",
+      "Real-time availability view (in-stock / low-stock / out-of-stock)",
+      "Batch tracking, expiry alerts and low-stock notifications",
+      "Itemized invoicing & M-Pesa payment recording on dispense",
+    ],
   },
   {
-    name: "Inventory & Pharmacy Management",
-    description: "Real-time stock tracking, batch management, and automated low-stock alerts to optimize pharmacy operations.",
-    cost: 50000,
+    name: "Phase 4 — Super Admin Dashboard & Oversight",
+    duration: "Week 7",
+    cost: 60000,
+    summary: "Centralized command center giving the Super Admin full visibility and CRUD control across every branch, user, patient, prescription, stock and payment.",
+    deliverables: [
+      "Aggregated multi-branch KPIs: patients, revenue, stock, appointments",
+      "Full CRUD on users, roles, branches, patients, inventory and invoices",
+      "Cross-branch reporting with custom date ranges and export",
+      "AI-powered inventory forecasting and stockout predictions",
+      "Audit trail and real-time activity monitoring",
+      "Mobile clinic oversight: units, routes, field dispensing & returns",
+      "Deployment, go-live and full team training",
+    ],
   },
-  {
-    name: "Billing & Invoicing",
-    description: "Financial tracking of M-Pesa and cash payments with professional itemized invoicing.",
-    cost: 30000,
-  },
-  {
-    name: "Mobile Clinic Operations",
-    description: "Advanced management of mobile units, recurring routes, field check-ins, on-site dispensing, and inventory returns.",
-    cost: 45000,
-  },
-  {
-    name: "Technical Infrastructure",
-    description: "Secure cloud backend, Row-Level Security implementation, and responsive cross-device design.",
-    cost: 35000,
-  },
-];
-
-const timeline = [
-  { phase: "Week 1", duration: "Foundation — Auth, Database setup & RBAC configuration" },
-  { phase: "Week 2", duration: "Foundation — Admin dashboard, analytics & branch configuration" },
-  { phase: "Week 3", duration: "Core Modules — EHR development & patient workflows" },
-  { phase: "Week 4", duration: "Core Modules — Inventory & pharmacy management" },
-  { phase: "Week 5", duration: "Core Modules — Billing, invoicing & payment integrations" },
-  { phase: "Week 6", duration: "Mobile Clinic — Unit system, routes, field check-ins & dispensing" },
-  { phase: "Week 7", duration: "Deployment & Training — Testing, go-live & user training" },
 ];
 
 export default function ProjectInvoice() {
